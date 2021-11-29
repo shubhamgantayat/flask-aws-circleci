@@ -14,7 +14,7 @@ workflows:
           region: ${AWS_REGION}
           account-url: ${AWS_ECR_ACCOUNT_URL}
           repo: flask-app
-          tag: ${CIRCLE_BUILD_NUM}
+          tag: latest
           requires:
             - build_test
             - docker_hub_build_push_image
