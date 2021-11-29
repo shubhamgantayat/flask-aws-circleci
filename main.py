@@ -11,7 +11,7 @@ CORS(app)
 @app.route('/', methods=['GET'])
 @cross_origin()
 def home():
-    return "App is running.hello world.jk"
+    return "App is running.hello world.jkhhhh"
 
 
 if __name__ == '__main__':
