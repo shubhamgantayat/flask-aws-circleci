@@ -28,11 +28,11 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install --no-cache-dir -r requirements.txt
+            pip install -r requirements.txt
       - run:
           name: Run Tests
           command: |
-            . helloworld/bin/activate
+            . venv/bin/activate
             python -m pytest -v tests/test_script.py
   docker_hub_build_push_image:
     docker:
