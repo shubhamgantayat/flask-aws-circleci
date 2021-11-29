@@ -13,8 +13,8 @@ workflows:
       - aws-ecr/build_and_push_image:
           region: ${AWS_REGION}
           account-url: ${AWS_ECR_ACCOUNT_URL}
-#          repo: flask-app
-          tag: ${CIRCLE_BUILD_NUM}
+          repo: flask-app
+#          tag: ${CIRCLE_BUILD_NUM}
           requires:
             - build_test
 jobs:
