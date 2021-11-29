@@ -20,7 +20,7 @@ workflows:
 jobs:
   build_test:
     docker:
-      - image: circleci/python:3.7.14
+      - image: circleci/python:3.6.2-stretch-browsers
     steps:
       - checkout
       - run:
@@ -36,7 +36,7 @@ jobs:
             python -m pytest -v tests/test_script.py
   docker_hub_build_push_image:
     docker:
-      - image: circleci/python:3.7.14
+      - image: circleci/python:3.6.2-stretch-browsers
     steps:
       - checkout
       - setup_remote_docker:
