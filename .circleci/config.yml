@@ -1,31 +1,52 @@
 version: 2.1
+
 orbs:
-  aws-ecr: circleci/aws-ecr@6.9.1
-  aws-ecs: circleci/aws-ecs@1.2.0
+  aws-ecr: circleci/aws-ecr@0.0.4
+
+workflows:
+  build_test_deploy:
+    jobs:
+      - build_test
+      - docker_hub_build_push_image:
+          requires:
+            - build_test
+      - aws-ecr/build_and_push_image:
+          region: ${AWS_REGION}
+          account-url: ${AWS_ECR_ACCOUNT_URL}
+          repo: ${CIRCLE_PROJECT_REPONAME}
+          tag: ${CIRCLE_BUILD_NUM}
+          requires:
+            - build_test
 jobs:
-  test:
+  build_test:
     docker:
-      - image: python:3.7
-        environment:
-          FLASK_ENV: test
-    working_directory: ~/app
+      - image: circleci/python:2.7.14
     steps:
       - checkout
-      - run: pip install -r requirements.txt
-      - run: python -m pytest -v tests/test_script.py
-      - store_test_results:
-          path: _build/test/lib/flask_app
-workflows:
-  version: 2
-  test-and-build:
-    jobs:
-      - test
-      - aws-ecr/build-and-push-image:
-          repo: "flask-app"
-          tag: "${CIRCLE_BRANCH}_${CIRCLE_SHA1},${CIRCLE_BRANCH}_latest"
-          requires:
-            - test
-          filters:
-            branches:
-              only:
-                - main
+      - run:
+          name: Setup VirtualEnv
+          command: |
+            virtualenv helloworld
+            . helloworld/bin/activate
+            pip install --no-cache-dir -r requirements.txt
+      - run:
+          name: Run Tests
+          command: |
+            . helloworld/bin/activate
+            python -m pytest -v tests/test_script.py
+  docker_hub_build_push_image:
+    docker:
+      - image: circleci/python:3.7.14
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - run:
+          name: Build and push Docker image to Docker Hub
+          command: |
+            echo 'export TAG=0.1.${CIRCLE_BUILD_NUM}' >> ${BASH_ENV}
+            echo 'export IMAGE_NAME=${CIRCLE_PROJECT_REPONAME}' >> ${BASH_ENV}
+            source ${BASH_ENV}
+            docker build -t ${DOCKER_LOGIN}/${IMAGE_NAME} -t ${DOCKER_LOGIN}/${IMAGE_NAME}:${TAG} .
+            echo ${DOCKER_PWD} | docker login -u ${DOCKER_LOGIN} --password-stdin
+            docker push ${DOCKER_LOGIN}/${IMAGE_NAME}
