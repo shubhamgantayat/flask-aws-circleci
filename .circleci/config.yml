@@ -7,9 +7,6 @@ workflows:
   build_test_deploy:
     jobs:
       - build_test
-      - docker_hub_build_push_image:
-          requires:
-            - build_test
       - aws-ecr/build_and_push_image:
           region: ${AWS_REGION}
           account-url: ${AWS_ECR_ACCOUNT_URL}
@@ -35,19 +32,3 @@ jobs:
           command: |
             . venv/bin/activate
             python -m pytest -v tests/test_script.py
-  docker_hub_build_push_image:
-    docker:
-      - image: circleci/python:3.6.2-stretch-browsers
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: false
-      - run:
-          name: Build and push Docker image to Docker Hub
-          command: |
-            echo 'export TAG=0.1.${CIRCLE_BUILD_NUM}' >> ${BASH_ENV}
-            echo 'export IMAGE_NAME=flask-app' >> ${BASH_ENV}
-            source ${BASH_ENV}
-            docker build -t ${DOCKER_LOGIN}/${IMAGE_NAME} -t ${DOCKER_LOGIN}/${IMAGE_NAME}:${TAG} .
-            echo ${DOCKER_PWD} | docker login -u ${DOCKER_LOGIN} --password-stdin
-            docker push ${DOCKER_LOGIN}/${IMAGE_NAME}
