@@ -1,7 +1,7 @@
 {
   "AWSEBDockerrunVersion": "1",
   "Image": {
-    "Name": "public.ecr.aws/g0p7w8w5/flask-app"
+    "Name": "sgantayat9/flask-app:latest"
   },
   "Ports": [
     {
